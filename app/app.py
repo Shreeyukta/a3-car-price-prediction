@@ -18,8 +18,7 @@ app.layout = dbc.Container([
     html.H1("Car Price Prediction", className="text-center my-4"),
     html.H2("Instructions", className="text-center"),
     html.P(
-        "To predict the car price, choose maximum power, mileage, and year. "
-        "If you're unsure of maximum power and mileage, you can use the provided default values to help predict the price.",
+        "To predict the car price, enter maximum power, engine, mileage, and year. ",
         className="text-center"
     ),
     dbc.Row(
