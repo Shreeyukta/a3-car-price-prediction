@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/shreeyukta/machinelearning/lab/a2-car-price-prediction/code/mlruns/0/60e28e5418b74ed8a15809c58f881578/artifacts
+end_time: 1739285831697
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 60e28e5418b74ed8a15809c58f881578
+run_name: Fold-0
+run_uuid: 60e28e5418b74ed8a15809c58f881578
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1739285831675
+status: 3
+tags: []
+user_id: shreeyukta
