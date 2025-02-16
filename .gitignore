@@ -1,2 +1,12 @@
 .DS_Store
 .venv/
+mlruns/
+mlartifacts/
+
+.vscode/
+
+# Ignore Docker build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

@@ -6,105 +6,110 @@ import numpy as np
 import joblib
 import os
 
-model_path = "./model/a1_car_price.pkl"
-model = joblib.load(model_path)
-print("Model loaded successfully!")
-scaler_model = joblib.load("./model/scaler.dump")
+# Load Models
+model_path_old = "./model/a1_car_price.pkl"
+model_path_new = "./model/a2_car_price.pkl" 
+scaler_path = "./model/scaler.dump"
 
+try:
+    model_old = joblib.load(model_path_old)
+    model_new = joblib.load(model_path_new)
+    scaler_model = joblib.load(scaler_path)
+    print("Models loaded successfully!")
+except Exception as e:
+    print(f"Error loading models: {e}")
+    exit()
+
+# Dash App Setup
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = "Car Price Predictor"
 
+# Card Layout for the Form
 app.layout = dbc.Container([
     html.H1("Car Price Prediction", className="text-center my-4"),
-    html.H2("Instructions", className="text-center"),
-    html.P(
-        "To predict the car price, enter maximum power, engine, mileage, and year. ",
-        className="text-center"
-    ),
+    html.P("Enter car details below to predict its price using two models.", className="text-center"),
+    
+    # Card for the Form
+    dbc.Card([
+        dbc.CardBody([
+            dbc.Row([
+                dbc.Col([
+                    dbc.Label("Year of Manufacture"),
+                    dbc.Input(id="input-year", type="number", placeholder="Enter the year", min=1900, max=2025, step=1),
+                ], width=6),
+                dbc.Col([
+                    dbc.Label("Mileage (kmpl)"),
+                    dbc.Input(id="input-mileage", type="number", placeholder="Enter the mileage in kmpl", min=0),
+                ], width=6),
+            ], className="mb-3"),
+            
+            dbc.Row([
+                dbc.Col([
+                    dbc.Label("Max Power (bhp)"),
+                    dbc.Input(id="input-max-power", type="number", placeholder="Enter max power in bhp", min=0),
+                ], width=6),
+                dbc.Col([
+                    dbc.Label("Engine (cc)"),
+                    dbc.Input(id="input-engine", type="number", placeholder="Enter engine size in cc", min=0),
+                ], width=6),
+            ], className="mb-3"),
+            
+            dbc.Row([
+                dbc.Col([
+                    dbc.Button("Predict (Old Model)", id="predict-button-old", color="primary", className="mt-3 w-100"),
+                ], width=6),
+                dbc.Col([
+                    dbc.Button("Predict (New Model)", id="predict-button-new", color="success", className="mt-3 w-100"),
+                ], width=6),
+            ], className="mb-4"),
+        ])
+    ], className="shadow p-3 mb-5 bg-white rounded mx-auto"), 
+    
+    # Prediction Output
     dbc.Row(
-        dbc.Col(
-            [
-                dbc.Row([
-                    dbc.Col([
-                        dbc.Label("Year of Manufacture"),
-                        dbc.Input(id="input-year", type="number", placeholder="Enter the year", min=1900, max=2025, step=1),
-                            dbc.Tooltip("Please enter a year between 1900 and 2025.", target="input-year", placement="right", id="year-tooltip", is_open=False)
-                    ], width=6),
-
-                    dbc.Col([
-                        dbc.Label("Mileage (kmpl)"),
-                        dbc.Input(id="input-mileage", type="number", placeholder="Enter the mileage in kmpl", min=0),
-                    ], width=6),
-                ], className="mb-3"),
-
-                dbc.Row([
-                    dbc.Col([
-                        dbc.Label("Max Power (bhp)"),
-                        dbc.Input(id="input-max-power", type="number", placeholder="Enter the max power in bhp", min=0),
-                    ], width=6),
-
-                    dbc.Col([
-                        dbc.Label("Engine (cc)"),
-                        dbc.Input(id="input-engine", type="number", placeholder="Enter the engine size in cc", min=0),
-                    ], width=6),
-                ], className="mb-3"),
-
-                dbc.Row([
-                    dbc.Col([
-                        dbc.Button("Predict", id="predict-button", color="primary", className="mt-3"),
-                    ], width=12, className="text-center"),
-                ]),
-
-                dbc.Row([
-                    dbc.Col([
-                        html.H4("Predicted Price:", className="mt-4"),
-                        html.Div(id="output-prediction", className="alert alert-info"),
-                    ], width=12),
-                ]),
-            ],
-            width=8,  
-            className="shadow p-4 bg-light rounded mx-auto"  
-        ),
-        justify="center", 
-        className="my-4"  
-    )
+        dbc.Col([
+            html.H4("Predicted Price:", className="mt-4"),
+            dbc.Spinner(html.Div(id="output-prediction", className="alert alert-info"), color="primary"),
+        ], width=12),
+    ),
 ], fluid=True)
 
-
-
+# Callback for Prediction
 @app.callback(
     Output("output-prediction", "children"),
-    Input("predict-button", "n_clicks"),
-    State("input-year", "value"),
-    State("input-mileage", "value"),
-    State("input-max-power", "value"),
-    State("input-engine", "value"),
+    [Input("predict-button-old", "n_clicks"), Input("predict-button-new", "n_clicks")],
+    [State("input-year", "value"), State("input-mileage", "value"),
+     State("input-max-power", "value"), State("input-engine", "value")]
 )
-def predict_price(n_clicks, year, mileage, max_power, engine):
-    if n_clicks is None or None in [year, mileage, max_power, engine]:
+def predict_price(n_clicks_old, n_clicks_new, year, mileage, max_power, engine):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return "Click a button to predict price."
+    if None in [year, mileage, max_power, engine]:
         return "Please provide all input values."
-
-    input_data = {
+    
+    # Determine which button was clicked
+    button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    
+    # Choose Model Based on Button Click
+    model = model_old if button_id == "predict-button-old" else model_new
+    
+    # Prepare input data
+    input_data = pd.DataFrame({
         'engine': [engine],
         'max_power': [max_power],
         'mileage': [mileage],
         'year': [year],
-    }
-
-    df = pd.DataFrame(input_data)
-
+    })
+    
     try:
-        scaled_data = scaler_model.transform(df)
-
-        
+        scaled_data = scaler_model.transform(input_data)
         pred_log = model.predict(scaled_data)
-        print("Predicted log price:", pred_log)
-
         pred_price = np.exp(pred_log[0])
-
         return f"Predicted Price: {pred_price:,.2f} Baht"
     except Exception as e:
         return f"Error in prediction: {e}"
 
+# Run the app
 if __name__ == "__main__":
     app.run_server(debug=True)
