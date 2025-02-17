@@ -10,6 +10,8 @@ import os
 model_path_old = "./model/a1_car_price.pkl"
 model_path_new = "./model/a2_car_price.pkl" 
 scaler_path = "./model/scaler.dump"
+print("Model Old:", model_path_old)
+print("Scaler Model:", model_path_new)
 
 try:
     model_old = joblib.load(model_path_old)

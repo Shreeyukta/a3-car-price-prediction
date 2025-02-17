@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   dash:
     image: shreeyxkta/ml-car-price:latest

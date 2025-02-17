@@ -11,6 +11,7 @@ RUN pip3 install --no-cache-dir \
     dash-bootstrap-components \
     numpy \
     scikit-learn \
+    joblib\
     mlflow \
     dash[testing]
 
