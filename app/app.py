@@ -2,7 +2,6 @@ from __future__ import annotations
 import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
-from itertools import product
 import pandas as pd
 import numpy as np
 import joblib
@@ -12,72 +11,75 @@ import os
 model_old = joblib.load(os.path.join(os.getcwd(), "model", "a1_car_price.pkl"))
 model_new = joblib.load(os.path.join(os.getcwd(), "model", "a2_car_price.pkl"))
 scaler_model = joblib.load(os.path.join(os.getcwd(), "model", "scaler.dump"))
-# print("Model Old:", model_old)
-# print("New Model", model_new)
-print('helo yeta ougey')
-
-# try:
-#     model_old = joblib.load(model_path_old)
-#     model_new = joblib.load(model_path_new)
-#     scaler_model = joblib.load(scaler_path)
-#     print("Models loaded successfully!")
-# except Exception as e:
-#     print(f"Error loading models: {e}")
-#     exit()
 
 # Dash App Setup
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 app.title = "Car Price Predictor"
 
-# Card Layout for the Form
+# App Layout
 app.layout = dbc.Container([
-    html.H1("Car Price Prediction", className="text-center my-4"),
-    html.P("Enter car details below to predict its price using two models.", className="text-center"),
+    html.H1("Car Price Prediction", className="text-center mt-4 text-primary fw-bold"),
     
-    # Card for the Form
+    # Notice Message at the Top
+    dbc.Alert([
+        html.H5("⚡ New Model Update!", className="fw-bold"),
+        html.P("We now have two models for predicting car prices."),
+        html.Ul([
+            html.Li("The 🔵 **Old Model** is based on basic regression."),
+            html.Li("The 🟢 **New Model** uses an improved machine learning approach with better accuracy."),
+            html.Li("For better results, we recommend using the **New Model**."),
+        ], className="mb-0"),
+    ], color="info", className="shadow-sm text-dark"),
+    
+    html.P("Enter car details to predict the price using two models.", className="text-center text-muted mb-4"),
+
+    # Card Layout with More Spacious Styling
     dbc.Card([
         dbc.CardBody([
+            # Input Fields with More Padding and Clear Labels
             dbc.Row([
                 dbc.Col([
-                    dbc.Label("Year of Manufacture"),
-                    dbc.Input(id="input-year", type="number", placeholder="Enter the year", min=1900, max=2025, step=1),
-                ], width=6),
+                    dbc.Label("Year of Manufacture", className="fw-semibold text-muted"),
+                    dbc.Input(id="input-year", type="number", placeholder="e.g., 2015", min=1900, max=2025, step=1, className="form-control"),
+                ], width=6, className="mb-3"),
                 dbc.Col([
-                    dbc.Label("Mileage (kmpl)"),
-                    dbc.Input(id="input-mileage", type="number", placeholder="Enter the mileage in kmpl", min=0),
-                ], width=6),
-            ], className="mb-3"),
+                    dbc.Label("Mileage (kmpl)", className="fw-semibold text-muted"),
+                    dbc.Input(id="input-mileage", type="number", placeholder="Mileage in kmpl", min=0, className="form-control"),
+                ], width=6, className="mb-3"),
+            ]),
             
             dbc.Row([
                 dbc.Col([
-                    dbc.Label("Max Power (bhp)"),
-                    dbc.Input(id="input-max-power", type="number", placeholder="Enter max power in bhp", min=0),
-                ], width=6),
+                    dbc.Label("Max Power (bhp)", className="fw-semibold text-muted"),
+                    dbc.Input(id="input-max-power", type="number", placeholder="Max Power in bhp", min=0, className="form-control"),
+                ], width=6, className="mb-3"),
                 dbc.Col([
-                    dbc.Label("Engine (cc)"),
-                    dbc.Input(id="input-engine", type="number", placeholder="Enter engine size in cc", min=0),
-                ], width=6),
-            ], className="mb-3"),
+                    dbc.Label("Engine (cc)", className="fw-semibold text-muted"),
+                    dbc.Input(id="input-engine", type="number", placeholder="Engine size in cc", min=0, className="form-control"),
+                ], width=6, className="mb-3"),
+            ]),
             
+            # Prediction Buttons with Better Layout
             dbc.Row([
                 dbc.Col([
-                    dbc.Button("Predict (Old Model)", id="predict-button-old", color="primary", className="mt-3 w-100"),
-                ], width=6),
+                    dbc.Button("Predict (Old Model)", id="predict-button-old", color="primary", className="w-100 py-3 fw-bold"),
+                ], width=6, className="mb-3"),
                 dbc.Col([
-                    dbc.Button("Predict (New Model)", id="predict-button-new", color="success", className="mt-3 w-100"),
-                ], width=6),
-            ], className="mb-4"),
+                    dbc.Button("Predict (New Model)", id="predict-button-new", color="success", className="w-100 py-3 fw-bold"),
+                ], width=6, className="mb-3"),
+            ]),
+
         ])
-    ], className="shadow p-3 mb-5 bg-white rounded mx-auto"), 
+    ], className="shadow-lg p-4 rounded-3 border-0 bg-white mb-5"),
     
-    # Prediction Output
+    # Prediction Output with More Breathing Room
     dbc.Row(
         dbc.Col([
-            html.H4("Predicted Price:", className="mt-4"),
-            dbc.Spinner(html.Div(id="output-prediction", className="alert alert-info"), color="primary"),
-        ], width=12),
+            html.H4("Predicted Price:", className="mt-4 text-primary fw-semibold"),
+            dbc.Spinner(html.Div(id="output-prediction", className="alert alert-info mt-3"), color="primary"),
+        ], width=12, className="text-center"),
     ),
-], fluid=True)
+], fluid=True, className="d-flex flex-column align-items-center justify-content-start py-1")
 
 # Callback for Prediction
 @app.callback(
@@ -108,18 +110,13 @@ def predict_price(n_clicks_old, n_clicks_new, year, mileage, max_power, engine):
     })
     
     try:
-        try:
-            scaled_data = scaler_model.transform(input_data)
-        except Exception as e:
-            return f"Error in scaling data: {e}"
-        
-        print("Scaled passed")
+        scaled_data = scaler_model.transform(input_data)
         pred_log = model.predict(scaled_data)
         pred_price = np.exp(pred_log[0])
-        return f"Predicted Price: {pred_price:,.2f} Baht"
+        return f"Predicted Price by {'New Model' if model == model_new else 'Old Model'}: {pred_price:,.2f} Baht"
+
     except Exception as e:
         return f"Error in prediction: {e}"
 
-# Run the app
 if __name__ == "__main__":
     app.run_server(debug=True)

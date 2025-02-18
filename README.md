@@ -9,4 +9,10 @@ A web application that predicts car prices based on user inputs, such as maximum
 ---
 
 ## URL
+
 The website is live at: **https://st125168.ml.brain.cs.ait.ac.th/**
+
+## Screenshots
+
+![App Screenshot](snapshots/oldmodel.png)
+![App Screenshot](snapshots/newmodel.png)
