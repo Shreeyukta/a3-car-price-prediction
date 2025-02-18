@@ -1,4 +1,4 @@
-# Car Price Prediction App
+# A2 Car Price Prediction App
 
 **Name**: Shreeyukta Pradhanang
 
@@ -8,8 +8,5 @@ A web application that predicts car prices based on user inputs, such as maximum
 
 ---
 
-## Screenshots
-
-![App Screenshot](snapshots/fe.png)
-![App Screenshot](snapshots/predict1.png)
-![App Screenshot](snapshots/predict2.png)
+## URL
+The website is live at: **https://st125168.ml.brain.cs.ait.ac.th/**
