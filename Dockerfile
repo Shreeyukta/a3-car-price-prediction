@@ -1,4 +1,4 @@
-FROM python:3.11.4-bookworm
+FROM python:3.11.4-slim
 
 # Set working directory in the container
 WORKDIR /root/app
@@ -12,11 +12,15 @@ RUN pip3 install --no-cache-dir \
     numpy \
     scikit-learn \
     joblib\
+    matplotlib \
+    seaborn \
     mlflow \
     dash[testing]
 
 # Copy the application code
 COPY ./app /root/app
+
+COPY ./app/model /root/app/model
 
 EXPOSE 8050
 

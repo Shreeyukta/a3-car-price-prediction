@@ -1,26 +1,29 @@
+from __future__ import annotations
 import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
+from itertools import product
 import pandas as pd
 import numpy as np
 import joblib
 import os
 
 # Load Models
-model_path_old = "./model/a1_car_price.pkl"
-model_path_new = "./model/a2_car_price.pkl" 
-scaler_path = "./model/scaler.dump"
-print("Model Old:", model_path_old)
-print("Scaler Model:", model_path_new)
+model_old = joblib.load(os.path.join(os.getcwd(), "model", "a1_car_price.pkl"))
+model_new = joblib.load(os.path.join(os.getcwd(), "model", "a2_car_price.pkl"))
+scaler_model = joblib.load(os.path.join(os.getcwd(), "model", "scaler.dump"))
+# print("Model Old:", model_old)
+# print("New Model", model_new)
+print('helo yeta ougey')
 
-try:
-    model_old = joblib.load(model_path_old)
-    model_new = joblib.load(model_path_new)
-    scaler_model = joblib.load(scaler_path)
-    print("Models loaded successfully!")
-except Exception as e:
-    print(f"Error loading models: {e}")
-    exit()
+# try:
+#     model_old = joblib.load(model_path_old)
+#     model_new = joblib.load(model_path_new)
+#     scaler_model = joblib.load(scaler_path)
+#     print("Models loaded successfully!")
+# except Exception as e:
+#     print(f"Error loading models: {e}")
+#     exit()
 
 # Dash App Setup
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -105,7 +108,12 @@ def predict_price(n_clicks_old, n_clicks_new, year, mileage, max_power, engine):
     })
     
     try:
-        scaled_data = scaler_model.transform(input_data)
+        try:
+            scaled_data = scaler_model.transform(input_data)
+        except Exception as e:
+            return f"Error in scaling data: {e}"
+        
+        print("Scaled passed")
         pred_log = model.predict(scaled_data)
         pred_price = np.exp(pred_log[0])
         return f"Predicted Price: {pred_price:,.2f} Baht"
