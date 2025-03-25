@@ -17,17 +17,27 @@ app.title = "Car Price Predictor"
 
 # App Layout
 app.layout = dbc.Container([
-    html.H1("Car Price Prediction", className="text-center mt-4 text-primary fw-bold"),
+    html.H1("Car Price Category Prediction Model", className="text-center mt-4 text-primary fw-bold"),
     
     dbc.Alert([
-        html.H5("⚡ New Model Update!", className="fw-bold"),
-        html.P("We now have two models for predicting car prices."),
+        html.H5("", className="fw-bold text-center"),
+        html.P("This model predicts the price category of a car based on features like year, mileage, max power, and engine size."),
         html.Ul([
-            html.Li("The 🔵 **Old Model** is based on basic regression."),
-            html.Li("The 🟢 **New Model** uses an improved machine learning approach with better accuracy."),
-            html.Li("For better results, we recommend using the **New Model**."),
-        ], className="mb-0"),
+            html.Li([
+                "Category ", html.Strong("0"), ": Budget cars (lowest price range)"
+            ]),
+            html.Li([
+                "Category ", html.Strong("1"), ": Affordable cars (slightly higher range)"
+            ]),
+            html.Li([
+                "Category ", html.Strong("2"), ": Mid-range cars (moderately priced)"
+            ]),
+            html.Li([
+                "Category ", html.Strong("3"), ": Premium cars (highest price range)"
+            ]),
+        ])
     ], color="info", className="shadow-sm text-dark"),
+
     
     html.P("Enter car details to predict the price using two models.", className="text-center text-muted mb-4"),
 
@@ -57,16 +67,16 @@ app.layout = dbc.Container([
             
             dbc.Row([
                 dbc.Col([
-                    dbc.Button("Predict ", id="predict-button-new", color="primary", className="w-100 py-3 fw-bold"),
-                ], width=6, className="mb-3")
-            ]),
+                    dbc.Button("Predict", id="predict-button-new", color="primary", className="px-5 py-3 fw-bold")
+                ], width="auto")
+            ], justify="center", className="mb-3"),
 
         ])
     ], className="shadow-lg p-4 rounded-3 border-0 bg-white mb-5"),
     
     dbc.Row(
         dbc.Col([
-            html.H4("Predicted Price:", className="mt-4 text-primary fw-semibold"),
+            html.H4("Predicted Price Category:", className="mt-4 text-primary fw-semibold"),
             dbc.Spinner(html.Div(id="output-prediction", className="alert alert-info mt-3"), color="primary"),
         ], width=12, className="text-center"),
     ),
@@ -102,9 +112,9 @@ def predict_price(n_clicks_new, year, mileage, max_power, engine):
 
     try:
         scaled_data = scaler_model.transform(input_data)
-        pred_log = model.predict(scaled_data)
-        pred_price = (pred_log[0])
-        return f"Predicted Price Class by {'New Model'}: {pred_price}"
+        pred = model.predict(scaled_data)
+        pred_price = (pred[0])
+        return f"Category : {pred_price}"
 
     except Exception as e:
         return f"Error in prediction: {e}"

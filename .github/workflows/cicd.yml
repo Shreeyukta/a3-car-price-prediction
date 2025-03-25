@@ -3,7 +3,7 @@ name: Dash CICD
 on:
   push:
     branches:
-      - main
+      - test
 
 jobs:
   test:
