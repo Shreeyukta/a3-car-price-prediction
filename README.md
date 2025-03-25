@@ -13,4 +13,6 @@ A web application that predicts car price category based on user inputs, such as
 The website is live at: **https://st125168.ml.brain.cs.ait.ac.th/**
 
 ## Screenshots
-![alt text](image.png)
+
+![alt text](snapshots/image1.png)
+![alt text](snapshots/image.png)
