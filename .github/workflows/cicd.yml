@@ -3,14 +3,14 @@ name: Dash CICD
 on:
   push:
     branches:
-      - test
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v3
 
     - name: Set up python
@@ -23,16 +23,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r r.txt
 
-    # - name: Run Tests
-    #   run: |
-    #     pytest
+    - name: Run unit tests
+      run: |
+        python -m unittest discover -s . -p "test_*.py"
 
   build-and-deploy:
     runs-on: ubuntu-latest
     needs: test
 
     steps:
-    - name: Checkout Code
+    - name: Checkout repository
       uses: actions/checkout@v3
 
     - name: DockerHub login
