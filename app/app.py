@@ -110,4 +110,4 @@ def predict_price(n_clicks_new, year, mileage, max_power, engine):
         return f"Error in prediction: {e}"
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(debug=True)
