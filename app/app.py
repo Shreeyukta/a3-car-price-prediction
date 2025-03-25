@@ -1,4 +1,3 @@
-from __future__ import annotations
 import dash
 from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
@@ -8,8 +7,8 @@ import joblib
 import os
 
 # Load Models
-model_old = joblib.load(os.path.join(os.getcwd(), "model", "a1_car_price.pkl"))
-model_new = joblib.load(os.path.join(os.getcwd(), "model", "a2_car_price.pkl"))
+# model_new = joblib.load(os.path.join(os.getcwd(), "model", "a3_car_price.pkl"))
+model_new = joblib.load("./model/a3_car_price.pkl")
 scaler_model = joblib.load(os.path.join(os.getcwd(), "model", "scaler.dump"))
 
 # Dash App Setup
@@ -20,7 +19,6 @@ app.title = "Car Price Predictor"
 app.layout = dbc.Container([
     html.H1("Car Price Prediction", className="text-center mt-4 text-primary fw-bold"),
     
-    # Notice Message at the Top
     dbc.Alert([
         html.H5("⚡ New Model Update!", className="fw-bold"),
         html.P("We now have two models for predicting car prices."),
@@ -33,10 +31,8 @@ app.layout = dbc.Container([
     
     html.P("Enter car details to predict the price using two models.", className="text-center text-muted mb-4"),
 
-    # Card Layout with More Spacious Styling
     dbc.Card([
         dbc.CardBody([
-            # Input Fields with More Padding and Clear Labels
             dbc.Row([
                 dbc.Col([
                     dbc.Label("Year of Manufacture", className="fw-semibold text-muted"),
@@ -59,20 +55,15 @@ app.layout = dbc.Container([
                 ], width=6, className="mb-3"),
             ]),
             
-            # Prediction Buttons with Better Layout
             dbc.Row([
                 dbc.Col([
-                    dbc.Button("Predict (Old Model)", id="predict-button-old", color="primary", className="w-100 py-3 fw-bold"),
-                ], width=6, className="mb-3"),
-                dbc.Col([
-                    dbc.Button("Predict (New Model)", id="predict-button-new", color="success", className="w-100 py-3 fw-bold"),
-                ], width=6, className="mb-3"),
+                    dbc.Button("Predict ", id="predict-button-new", color="primary", className="w-100 py-3 fw-bold"),
+                ], width=6, className="mb-3")
             ]),
 
         ])
     ], className="shadow-lg p-4 rounded-3 border-0 bg-white mb-5"),
     
-    # Prediction Output with More Breathing Room
     dbc.Row(
         dbc.Col([
             html.H4("Predicted Price:", className="mt-4 text-primary fw-semibold"),
@@ -81,39 +72,39 @@ app.layout = dbc.Container([
     ),
 ], fluid=True, className="d-flex flex-column align-items-center justify-content-start py-1")
 
-# Callback for Prediction
 @app.callback(
     Output("output-prediction", "children"),
-    [Input("predict-button-old", "n_clicks"), Input("predict-button-new", "n_clicks")],
+    Input("predict-button-new", "n_clicks"),
     [State("input-year", "value"), State("input-mileage", "value"),
      State("input-max-power", "value"), State("input-engine", "value")]
 )
-def predict_price(n_clicks_old, n_clicks_new, year, mileage, max_power, engine):
-    ctx = dash.callback_context
+def predict_price(n_clicks_new, year, mileage, max_power, engine):
+    import dash
+    import pandas as pd
+    import numpy as np
+    import traceback
+
+    ctx = dash.ctx if hasattr(dash, 'ctx') else dash.callback_context
     if not ctx.triggered:
         return "Click a button to predict price."
     if None in [year, mileage, max_power, engine]:
         return "Please provide all input values."
-    
-    # Determine which button was clicked
+
     button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+    model =  model_new
     
-    # Choose Model Based on Button Click
-    model = model_old if button_id == "predict-button-old" else model_new
-    
-    # Prepare input data
     input_data = pd.DataFrame({
         'engine': [engine],
         'max_power': [max_power],
         'mileage': [mileage],
         'year': [year],
     })
-    
+
     try:
         scaled_data = scaler_model.transform(input_data)
         pred_log = model.predict(scaled_data)
-        pred_price = np.exp(pred_log[0])
-        return f"Predicted Price by {'New Model' if model == model_new else 'Old Model'}: {pred_price:,.2f} Baht"
+        pred_price = (pred_log[0])
+        return f"Predicted Price Class by {'New Model'}: {pred_price}"
 
     except Exception as e:
         return f"Error in prediction: {e}"
