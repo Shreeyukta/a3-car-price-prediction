@@ -3,9 +3,12 @@ import joblib
 import pandas as pd
 import numpy as np
 import os
+import cloudpickle
 
-model = joblib.load("app/model/a3_car_price.pkl")
 scaler = joblib.load("app/model/scaler.dump")
+with open("app/model/a3_car_price.pkl", "rb") as f:
+    model = cloudpickle.load(f)
+
 
 sample_input = pd.DataFrame({
     'engine': [1500],
